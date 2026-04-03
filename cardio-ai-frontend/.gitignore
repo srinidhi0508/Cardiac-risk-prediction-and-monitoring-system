@@ -52,3 +52,4 @@ __pycache__/
 backend/__pycache__/
 
 *.zip
+*.db
