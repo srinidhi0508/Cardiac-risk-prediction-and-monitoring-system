@@ -1,0 +1,176 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { HeartPulse, Activity, FileText, Bell, User, LogOut, TrendingUp, Zap } from "lucide-react";
+import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
+export const patientNavItems = [
+  { label: "Overview",  icon: Activity,   href: "/patient-dashboard" },
+  { label: "Vitals",    icon: HeartPulse, href: "/patient-dashboard/vitals" },
+  { label: "Risk",      icon: TrendingUp, href: "/patient-dashboard/risk" },
+  { label: "Reports",   icon: FileText,   href: "/patient-dashboard/reports" },
+];
+
+export function PatientSidebar({ patient }: any) {
+  const router   = useRouter();
+  const pathname = usePathname();
+
+  return (
+    <aside className="fixed left-0 top-0 h-full w-64 z-20 flex flex-col py-6 px-4"
+      style={{ background:"rgba(255,255,255,0.03)", borderRight:"1px solid rgba(255,255,255,0.06)", backdropFilter:"blur(20px)" }}>
+
+      <div className="flex items-center gap-3 px-2 mb-10">
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center"
+          style={{ background:"linear-gradient(135deg,#6366f1,#a855f7)" }}>
+          <HeartPulse className="w-4 h-4 text-white"/>
+        </div>
+        <span className="text-white font-bold">PulseGuard</span>
+      </div>
+
+      {/* Dynamic patient info */}
+      <div className="px-3 py-4 rounded-2xl mb-6"
+        style={{ background:"rgba(99,102,241,0.1)", border:"1px solid rgba(99,102,241,0.2)" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background:"linear-gradient(135deg,#6366f1,#a855f7)" }}>
+            <User className="w-5 h-5 text-white"/>
+          </div>
+          <div>
+            <div className="text-white text-sm font-semibold">
+              {patient?.name || "Loading..."}
+            </div>
+            <div className="text-xs" style={{ color:"rgba(255,255,255,0.4)" }}>
+              Age {patient?.age ?? "--"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <nav className="flex flex-col gap-1 flex-1">
+        {patientNavItems.map(item => {
+          const active = pathname === item.href;
+          return (
+            <button key={item.label} onClick={() => router.push(item.href)}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium w-full text-left"
+              style={{
+                background: active ? "rgba(99,102,241,0.2)" : "transparent",
+                color:      active ? "#a5b4fc" : "rgba(255,255,255,0.5)",
+                border:     active ? "1px solid rgba(99,102,241,0.3)" : "1px solid transparent",
+              }}>
+              <item.icon className="w-4 h-4"/>{item.label}
+            </button>
+          );
+        })}
+      </nav>
+
+      <button onClick={() => router.push("/")}
+        className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm"
+        style={{ color:"rgba(255,255,255,0.35)" }}>
+        <LogOut className="w-4 h-4"/> Sign Out
+      </button>
+    </aside>
+  );
+}
+
+export default function PatientDashboard() {
+  const [patient, setPatient] = useState<any>(null);
+
+  // ✅ Fetch from FastAPI
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/patient/P001")
+      .then(res => res.json())
+      .then(data => setPatient(data))
+      .catch(err => console.error(err));
+  }, []);
+
+  // ✅ Extract analysis safely
+  const avgBpm = patient?.analysis?.avg_bpm;
+  const risk   = patient?.analysis?.risk_level;
+
+  return (
+    <main className="min-h-screen"
+      style={{ background:"linear-gradient(135deg,#0a0a1a 0%,#0d0d2b 40%,#1a0a2e 100%)" }}>
+
+      <PatientSidebar patient={patient}/>
+
+      <div className="ml-64 p-8">
+
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-white">
+              Good morning, {patient?.name?.split(" ")[0] || "User"} 👋
+            </h1>
+            <p className="text-sm mt-1"
+              style={{ color:"rgba(255,255,255,0.4)" }}>
+              Here's your cardiac overview for today
+            </p>
+          </div>
+
+          <button className="w-10 h-10 rounded-full flex items-center justify-center"
+            style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)" }}>
+            <Bell className="w-4 h-4 text-white"/>
+          </button>
+        </div>
+
+        {/* Stat cards */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          {[
+            {
+              label:"Heart Rate",
+              value: avgBpm ?? "--",
+              unit:"bpm",
+              icon:HeartPulse,
+              color:"from-rose-500 to-pink-500"
+            },
+            {
+              label:"SpO₂",
+              value:"98",
+              unit:"%",
+              icon:Activity,
+              color:"from-emerald-500 to-teal-500"
+            },
+            {
+              label:"Risk",
+              value: risk ?? "--",
+              unit:"",
+              icon:TrendingUp,
+              color:"from-violet-500 to-purple-500"
+            },
+            {
+              label:"HRV",
+              value: patient?.analysis?.variability ?? "--",
+              unit:"ms",
+              icon:Zap,
+              color:"from-amber-500 to-orange-500"
+            },
+          ].map((v,i) => (
+            <motion.div key={v.label}
+              initial={{ opacity:0, y:20 }}
+              animate={{ opacity:1, y:0 }}
+              transition={{ delay:i*0.08 }}
+              className="p-5 rounded-2xl"
+              style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)" }}>
+
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center mb-3 bg-gradient-to-br ${v.color}`}>
+                <v.icon className="w-4 h-4 text-white"/>
+              </div>
+
+              <div className="text-2xl font-black text-white">
+                {v.value}
+                {v.unit && <span className="text-sm ml-1">{v.unit}</span>}
+              </div>
+
+              <div className="text-xs mt-1"
+                style={{ color:"rgba(255,255,255,0.4)" }}>
+                {v.label}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+      </div>
+    </main>
+  );
+}
