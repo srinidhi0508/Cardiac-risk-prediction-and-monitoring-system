@@ -1,78 +1,177 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { User, Lock } from "lucide-react";
+import { User, Lock, ArrowLeft, HeartPulse } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function PatientLogin() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Use requestAnimationFrame to ensure the browser has painted
+    // before triggering the animation — fixes blank on client-side nav
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setMounted(true);
+      });
+    });
+  }, []);
 
   const handleLogin = () => {
-    // Temporary simulated login
-    if (email && password) {
-      router.push("/patient-dashboard");
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
     }
+    setError("");
+    router.push("/patient-dashboard");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleLogin();
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-red-50 flex items-center justify-center px-6">
+    <main
+      className="min-h-screen flex items-center justify-center px-6 relative overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg, #0a0a1a 0%, #0d0d2b 40%, #1a0a2e 100%)",
+      }}
+    >
+      {/* Background orbs */}
+      <div
+        className="absolute top-1/4 left-1/4 w-80 h-80 rounded-full opacity-20 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #ec4899, transparent)" }}
+      />
+      <div
+        className="absolute bottom-1/4 right-1/4 w-72 h-72 rounded-full opacity-15 blur-3xl pointer-events-none"
+        style={{ background: "radial-gradient(circle, #6366f1, transparent)" }}
+      />
 
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="bg-white p-10 rounded-3xl shadow-2xl border border-gray-100 w-full max-w-md"
+      <div
+        className="w-full max-w-md p-10 rounded-3xl relative z-10"
+        style={{
+          background: "rgba(255,255,255,0.04)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          backdropFilter: "blur(30px)",
+          opacity: mounted ? 1 : 0,
+          transform: mounted ? "translateY(0)" : "translateY(40px)",
+          transition: "opacity 0.5s ease, transform 0.5s ease",
+        }}
       >
-        <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">
-          Patient Login
-        </h2>
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          <div
+            className="w-10 h-10 rounded-xl flex items-center justify-center"
+            style={{
+              background: "linear-gradient(135deg, #ec4899, #f43f5e)",
+              boxShadow: "0 8px 24px rgba(244,63,94,0.3)",
+            }}
+          >
+            <HeartPulse className="w-5 h-5 text-white" />
+          </div>
+          <h2
+            className="text-2xl font-bold text-white"
+            style={{ fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Patient Login
+          </h2>
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div
+            className="mb-4 px-4 py-2.5 rounded-xl text-sm text-center"
+            style={{
+              background: "rgba(239,68,68,0.15)",
+              border: "1px solid rgba(239,68,68,0.3)",
+              color: "#fca5a5",
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         {/* Email */}
-        <div className="mb-6 relative">
-          <User className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+        <div className="mb-5 relative">
+          <User
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          />
           <input
             type="email"
             placeholder="Email Address"
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full pl-11 pr-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: `1px solid ${
+                email
+                  ? "rgba(236,72,153,0.5)"
+                  : "rgba(255,255,255,0.1)"
+              }`,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
 
         {/* Password */}
         <div className="mb-6 relative">
-          <Lock className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+          <Lock
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          />
           <input
             type="password"
             placeholder="Password"
-            className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-400"
+            className="w-full pl-11 pr-4 py-3.5 rounded-xl text-white text-sm outline-none transition-all"
+            style={{
+              background: "rgba(255,255,255,0.06)",
+              border: `1px solid ${
+                password
+                  ? "rgba(236,72,153,0.5)"
+                  : "rgba(255,255,255,0.1)"
+              }`,
+              fontFamily: "'DM Sans', sans-serif",
+            }}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
 
         {/* Login Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+        <button
           onClick={handleLogin}
-          className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl font-semibold shadow-md"
+          className="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: "linear-gradient(135deg, #ec4899, #f43f5e)",
+            fontFamily: "'DM Sans', sans-serif",
+            boxShadow: "0 8px 24px rgba(244,63,94,0.3)",
+          }}
         >
           Login
-        </motion.button>
+        </button>
 
         {/* Back */}
-        <p
+        <button
           onClick={() => router.push("/select-login")}
-          className="text-center text-gray-500 mt-6 cursor-pointer hover:underline"
+          className="flex items-center justify-center gap-2 w-full mt-5 py-2.5 rounded-xl text-sm font-medium transition-all"
+          style={{
+            color: "rgba(255,255,255,0.45)",
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
         >
-          ← Back
-        </p>
-      </motion.div>
-
+          <ArrowLeft className="w-3.5 h-3.5" /> Back to Portal Selection
+        </button>
+      </div>
     </main>
   );
 }

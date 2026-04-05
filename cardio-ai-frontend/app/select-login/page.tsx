@@ -73,7 +73,7 @@ export default function SelectLogin() {
             key={p.key}
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.15 }}
-            whileHover={{ y: -8, scale: 1.02 }}
+            whileHover={{ y: -8, scale: 1.02, boxShadow: `0 20px 60px ${p.glow}` }}
             onClick={() => router.push(p.href)}
             className="cursor-pointer p-8 rounded-3xl group"
             style={{
@@ -82,8 +82,6 @@ export default function SelectLogin() {
               backdropFilter: "blur(30px)",
               transition: "box-shadow 0.3s ease",
             }}
-            onHoverStart={e => (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 60px ${p.glow}`}
-            onHoverEnd={e => (e.currentTarget as HTMLElement).style.boxShadow = "none"}
           >
             {/* Icon */}
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br ${p.gradient}`}

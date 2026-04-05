@@ -33,6 +33,7 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+
 # vercel
 .vercel
 
@@ -47,9 +48,14 @@ __pycache__/
 
 # Env files
 .env
+venv/
 
 # Optional
 backend/__pycache__/
+
+# OS
+Thumbs.db
+
 
 *.zip
 *.db
